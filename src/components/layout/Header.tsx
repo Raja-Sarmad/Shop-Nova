@@ -2,7 +2,17 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Heart, Menu, Search, ShoppingBag, UserRound, X } from "lucide-react";
+import {
+  ChevronDown,
+  Heart,
+  Leaf,
+  Menu,
+  Search,
+  ShoppingBag,
+  Truck,
+  UserRound,
+  X,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { BRAND, NAV } from "@/lib/constants";
 import { cn } from "@/lib/format";
@@ -23,100 +33,131 @@ export function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  useEffect(() => {
-    setMobile(false);
-  }, [pathname]);
+  if (pathname.startsWith("/admin")) return null;
 
   return (
     <>
-      <div className="bg-ink text-cream">
-        <div className="container-page flex items-center justify-center gap-3 py-2 text-[11px] tracking-[0.22em] uppercase">
-          <span>Complimentary shipping over Rs 15,000</span>
-          <span className="hidden text-gold sm:inline">·</span>
-          <span className="hidden sm:inline">14-day returns</span>
+      <div className="border-b border-white/10 bg-[#161311] text-white">
+        <div className="mx-auto flex w-full max-w-[1800px] items-center justify-center gap-3 px-4 py-2.5 text-sm sm:px-6 xl:px-10 2xl:px-14">
+          <Truck size={16} className="shrink-0 text-[#d4ae69]" />
+          <p className="text-center font-medium tracking-wide text-white/90">
+            Free shipping on orders over PKR 10,000
+          </p>
         </div>
       </div>
+
       <header
         className={cn(
           "sticky top-0 z-50 border-b transition-all duration-300",
           scrolled
-            ? "border-sand/80 bg-ivory/90 backdrop-blur-md"
-            : "border-transparent bg-ivory",
+            ? "border-[#e8dfd2] bg-[#fffcf8]/96 shadow-[0_10px_30px_rgba(40,28,16,0.08)] backdrop-blur-xl"
+            : "border-[#efe6da] bg-[#fffcf8]",
         )}
       >
-        <div className="container-page grid h-[72px] grid-cols-3 items-center">
-          <nav className="hidden items-center gap-7 lg:flex">
-            {NAV.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "text-[13px] tracking-[0.16em] uppercase transition-colors",
-                  pathname === item.href || pathname.startsWith(`${item.href}/`)
-                    ? "text-ink"
-                    : "text-ink-soft hover:text-ink",
-                )}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-          <button
-            type="button"
-            className="flex h-10 w-10 items-center justify-center lg:hidden"
-            onClick={() => setMobile(true)}
-            aria-label="Open menu"
-          >
-            <Menu size={20} />
-          </button>
-
-          <Link
-            href="/"
-            className="justify-self-center font-display text-[28px] font-medium tracking-[0.28em] text-ink"
-          >
-            {BRAND.name}
-          </Link>
-
-          <div className="flex items-center justify-end gap-1 sm:gap-2">
+        <div className="mx-auto grid h-[68px] w-full max-w-[1800px] grid-cols-[auto_1fr_auto] items-center gap-4 px-4 sm:h-[76px] sm:gap-6 sm:px-6 xl:px-10 2xl:px-14">
+          <div className="flex items-center gap-3">
             <button
               type="button"
-              onClick={() => setSearchOpen(true)}
-              className="flex h-10 w-10 items-center justify-center text-ink-soft transition-colors hover:text-ink"
-              aria-label="Search"
+              className="flex h-10 w-10 items-center justify-center rounded-full text-[#3f3831] hover:bg-[#f3ebe1] lg:hidden"
+              onClick={() => setMobile(true)}
+              aria-label="Open menu"
             >
-              <Search size={18} />
+              <Menu size={22} />
             </button>
-            <button
-              type="button"
-              onClick={() => router.push(user ? "/account" : "/login")}
-              className="hidden h-10 w-10 items-center justify-center text-ink-soft transition-colors hover:text-ink sm:flex"
-              aria-label="Account"
-            >
-              <UserRound size={18} />
-            </button>
+
             <Link
-              href="/wishlist"
-              className="relative flex h-10 w-10 items-center justify-center text-ink-soft transition-colors hover:text-ink"
-              aria-label="Wishlist"
+              href="/"
+              className="group flex shrink-0 items-center gap-2.5 text-[#171513]"
             >
-              <Heart size={18} />
-              {wishlist.length > 0 ? (
-                <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-terracotta" />
-              ) : null}
-            </Link>
-            <button
-              type="button"
-              onClick={() => setCartOpen(true)}
-              className="relative flex h-10 w-10 items-center justify-center text-ink-soft transition-colors hover:text-ink"
-              aria-label="Bag"
-            >
-              <ShoppingBag size={18} />
-              {count > 0 ? (
-                <span className="absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-ink px-1 text-[10px] text-cream">
-                  {count}
+              <span className="grid h-10 w-10 place-items-center rounded-full bg-[#f3ebe0] ring-1 ring-[#e4d7c5] transition-colors group-hover:bg-[#eadcc8]">
+                <Leaf size={20} className="fill-[#a8732f] text-[#a8732f]" />
+              </span>
+              <span className="flex flex-col leading-none">
+                <span className="font-display text-[26px] font-semibold tracking-[-0.02em] sm:text-[30px]">
+                  {BRAND.name}
                 </span>
-              ) : null}
-            </button>
+                <span className="mt-1 hidden text-[10px] font-medium uppercase tracking-[0.22em] text-[#8a7d6c] sm:block">
+                  Perfumes &amp; Shoes
+                </span>
+              </span>
+            </Link>
+          </div>
+
+          <nav className="hidden items-center justify-center gap-1 lg:flex xl:gap-2">
+            {NAV.map((item) => {
+              const active =
+                pathname === item.href ||
+                (item.href !== "/" && pathname.startsWith(item.href.split("?")[0]));
+              const hasDropdown =
+                item.label === "Perfumes" || item.label === "Shoes";
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "group relative inline-flex items-center gap-1 rounded-full px-3.5 py-2 text-[15px] font-medium tracking-[0.01em] transition-colors xl:px-4 xl:text-base",
+                    active
+                      ? "bg-[#f4ebe0] text-[#8f5f22]"
+                      : item.label === "Sale"
+                        ? "text-[#b84532] hover:bg-[#faf3eb]"
+                        : "text-[#2f2a24] hover:bg-[#f7f1e8] hover:text-[#8f5f22]",
+                  )}
+                >
+                  {item.label}
+                  {hasDropdown ? (
+                    <ChevronDown
+                      size={15}
+                      className="opacity-70 transition-transform duration-300 group-hover:rotate-180"
+                    />
+                  ) : null}
+                </Link>
+              );
+            })}
+          </nav>
+
+          <div className="flex items-center justify-end">
+            <div className="flex items-center gap-0.5 rounded-full border border-[#eadfce] bg-white/80 p-1 shadow-[0_2px_10px_rgba(48,35,19,0.04)] sm:gap-1 sm:px-1.5">
+              <button
+                type="button"
+                onClick={() => setSearchOpen(true)}
+                className="flex h-9 w-9 items-center justify-center rounded-full text-[#4a4239] transition-colors hover:bg-[#f4ebe0] hover:text-[#8f5f22] sm:h-10 sm:w-10"
+                aria-label="Search"
+              >
+                <Search size={18} />
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push(user ? "/account" : "/login")}
+                className="hidden h-10 w-10 items-center justify-center rounded-full text-[#4a4239] transition-colors hover:bg-[#f4ebe0] hover:text-[#8f5f22] sm:flex"
+                aria-label="Account"
+              >
+                <UserRound size={18} />
+              </button>
+              <Link
+                href="/wishlist"
+                className="relative flex h-9 w-9 items-center justify-center rounded-full text-[#4a4239] transition-colors hover:bg-[#f4ebe0] hover:text-[#8f5f22] sm:h-10 sm:w-10"
+                aria-label="Wishlist"
+              >
+                <Heart size={18} />
+                {wishlist.length > 0 ? (
+                  <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-terracotta" />
+                ) : null}
+              </Link>
+              <button
+                type="button"
+                onClick={() => setCartOpen(true)}
+                className="relative flex h-9 w-9 items-center justify-center rounded-full text-[#4a4239] transition-colors hover:bg-[#f4ebe0] hover:text-[#8f5f22] sm:h-10 sm:w-10"
+                aria-label="Bag"
+              >
+                <ShoppingBag size={18} />
+                {count > 0 ? (
+                  <span className="absolute -top-0.5 -right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#1c1612] px-1 text-[11px] font-semibold text-[#faf6f0]">
+                    {count}
+                  </span>
+                ) : null}
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -129,29 +170,37 @@ export function Header() {
             onClick={() => setMobile(false)}
             aria-label="Close menu"
           />
-          <aside className="relative flex h-full w-[86%] max-w-sm flex-col bg-ivory p-7 drawer-in">
+          <aside className="relative flex h-full w-[88%] max-w-sm flex-col bg-[#fffcf8] p-7 drawer-in">
             <div className="mb-10 flex items-center justify-between">
-              <span className="font-display text-2xl tracking-[0.2em]">{BRAND.name}</span>
+              <span className="flex items-center gap-2.5 font-display text-3xl">
+                <Leaf size={22} className="fill-[#a8732f] text-[#a8732f]" />
+                {BRAND.name}
+              </span>
               <button type="button" onClick={() => setMobile(false)} aria-label="Close">
                 <X size={22} />
               </button>
             </div>
-            <nav className="flex flex-col gap-5">
+            <nav className="flex flex-col gap-1">
               {NAV.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="font-display text-3xl"
+                  onClick={() => setMobile(false)}
+                  className="rounded-xl px-3 py-3 font-display text-3xl text-[#241f1a] hover:bg-[#f4ebe0]"
                 >
                   {item.label}
                 </Link>
               ))}
-              <Link href="/contact" className="font-display text-3xl">
+              <Link
+                href="/contact"
+                onClick={() => setMobile(false)}
+                className="rounded-xl px-3 py-3 font-display text-3xl text-[#241f1a] hover:bg-[#f4ebe0]"
+              >
                 Contact
               </Link>
             </nav>
-            <div className="mt-auto space-y-3 text-sm text-ink-soft">
-              <Link href={user ? "/account" : "/login"} className="block">
+            <div className="mt-auto space-y-3 text-base text-ink-soft">
+              <Link href={user ? "/account" : "/login"} className="block font-medium">
                 {user ? "Account" : "Sign in"}
               </Link>
               <p>{BRAND.email}</p>

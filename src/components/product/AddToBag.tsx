@@ -12,6 +12,7 @@ export function AddToBag({ product }: { product: Product }) {
   const [size, setSize] = useState(product.sizes[0] ?? "");
   const [qty, setQty] = useState(1);
   const saved = wishlist.includes(product.id);
+  const maxQuantity = product.stockQuantity ?? Number.POSITIVE_INFINITY;
 
   return (
     <div>
@@ -79,12 +80,13 @@ export function AddToBag({ product }: { product: Product }) {
             <Minus size={14} />
           </button>
           <span className="w-8 text-center">{qty}</span>
-          <button type="button" className="px-3 py-3" onClick={() => setQty((n) => n + 1)}>
+          <button type="button" className="px-3 py-3 disabled:opacity-40" disabled={qty >= maxQuantity} onClick={() => setQty((n) => Math.min(maxQuantity, n + 1))}>
             <Plus size={14} />
           </button>
         </div>
         <button
           type="button"
+          disabled={maxQuantity === 0}
           onClick={() =>
             addToCart({
               productId: product.id,
@@ -97,9 +99,9 @@ export function AddToBag({ product }: { product: Product }) {
               quantity: qty,
             })
           }
-          className="flex-1 bg-ink text-xs tracking-[0.2em] uppercase text-cream"
+          className="flex-1 bg-ink text-xs tracking-[0.2em] uppercase text-cream disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Add to bag
+          {maxQuantity === 0 ? "Out of stock" : "Add to bag"}
         </button>
         <button
           type="button"

@@ -7,6 +7,7 @@ import type { Product } from "@/lib/types";
 import { CATEGORIES, SORT_OPTIONS } from "@/lib/constants";
 import { ProductGrid } from "@/components/product/ProductCard";
 import { cn, formatPrice } from "@/lib/format";
+import { useManagedProducts } from "@/hooks/useManagedProducts";
 
 type Props = {
   products: Product[];
@@ -17,6 +18,7 @@ type Props = {
 };
 
 export function ShopCatalog({ products, colors, sizes, title = "The shop", subtitle }: Props) {
+  const managedProducts = useManagedProducts(products);
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -37,7 +39,7 @@ export function ShopCatalog({ products, colors, sizes, title = "The shop", subti
   };
 
   const filtered = useMemo(() => {
-    let list = [...products];
+    let list = [...managedProducts].filter((product) => product.stockQuantity === undefined || product.stockQuantity > 0);
     if (category !== "all") list = list.filter((p) => p.category === category);
     if (color) list = list.filter((p) => p.colors.some((c) => c.name === color));
     if (size) list = list.filter((p) => p.sizes.includes(size));
@@ -59,7 +61,7 @@ export function ShopCatalog({ products, colors, sizes, title = "The shop", subti
         list.sort((a, b) => Number(b.isBestseller) - Number(a.isBestseller));
     }
     return list;
-  }, [products, category, color, size, sort, max]);
+  }, [managedProducts, category, color, size, sort, max]);
 
   const Filters = (
     <div className="space-y-8">

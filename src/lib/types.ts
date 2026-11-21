@@ -1,4 +1,4 @@
-export type Category = "apparel" | "shoes" | "bags" | "jewelry" | "home";
+export type Category = "shoes" | "fragrance";
 
 export type ProductColor = {
   name: string;
@@ -22,6 +22,7 @@ export type Product = {
   rating: number;
   reviewCount: number;
   inStock: boolean;
+  stockQuantity?: number;
   isNew?: boolean;
   isBestseller?: boolean;
   fabric?: string;

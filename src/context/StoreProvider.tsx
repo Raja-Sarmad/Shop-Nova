@@ -10,6 +10,7 @@ import {
 } from "react";
 import type { Address, CartItem, Order, User } from "@/lib/types";
 import { FLAT_SHIPPING, FREE_SHIPPING_THRESHOLD } from "@/lib/constants";
+import { readManagedProducts, saveManagedProducts } from "@/lib/admin-catalog";
 
 type Toast = { id: number; message: string };
 
@@ -177,6 +178,17 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         address: input.address,
       };
       setOrders((prev) => [order, ...prev]);
+      const orderedQuantities = cart.reduce<Record<string, number>>((totals, item) => {
+        totals[item.productId] = (totals[item.productId] ?? 0) + item.quantity;
+        return totals;
+      }, {});
+      const currentProducts = readManagedProducts();
+      saveManagedProducts(currentProducts.map((product) => {
+        const sold = orderedQuantities[product.id];
+        if (!sold) return product;
+        const stockQuantity = Math.max(0, (product.stockQuantity ?? (product.inStock ? 10 : 0)) - sold);
+        return { ...product, stockQuantity, inStock: stockQuantity > 0 };
+      }));
       setCart([]);
       setCartOpen(false);
       return order;

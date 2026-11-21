@@ -19,7 +19,7 @@ export default function CartPage() {
 
       {cart.length === 0 ? (
         <div className="mt-16 max-w-lg">
-          <p className="text-ink-soft">The bag is empty. The linen edit is a good place to begin.</p>
+          <p className="text-ink-soft">Your bag is empty. Find a new favourite scent or pair to get started.</p>
           <Link href="/shop" className="mt-6 inline-block bg-ink px-6 py-3 text-xs tracking-[0.18em] uppercase text-cream">
             Continue shopping
           </Link>

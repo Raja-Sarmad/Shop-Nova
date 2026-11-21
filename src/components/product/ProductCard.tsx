@@ -52,12 +52,12 @@ export function ProductCard({
         </button>
         <div className="absolute top-3 left-3 flex flex-col gap-1">
           {product.isNew ? (
-            <span className="bg-ivory px-2 py-1 text-[10px] tracking-[0.18em] uppercase">
+            <span className="bg-ivory px-2.5 py-1 text-[11px] tracking-[0.16em] uppercase">
               New
             </span>
           ) : null}
           {product.compareAtPrice ? (
-            <span className="bg-terracotta px-2 py-1 text-[10px] tracking-[0.18em] uppercase text-cream">
+            <span className="bg-terracotta px-2.5 py-1 text-[11px] tracking-[0.16em] uppercase text-cream">
               Sale
             </span>
           ) : null}
@@ -65,14 +65,14 @@ export function ProductCard({
       </div>
       <div className="mt-4 flex items-start justify-between gap-3">
         <div>
-          <Link href={`/product/${product.slug}`} className="text-sm">
+          <Link href={`/product/${product.slug}`} className="text-[15px] font-medium">
             {product.name}
           </Link>
-          <p className="mt-1 text-xs text-muted">{product.subtitle}</p>
+          <p className="mt-1.5 text-sm text-muted">{product.subtitle}</p>
         </div>
-        <div className="text-right text-sm">
+        <div className="text-right text-[15px] font-medium">
           {product.compareAtPrice ? (
-            <p className="text-xs text-muted line-through">
+            <p className="text-sm text-muted line-through">
               {formatPrice(product.compareAtPrice)}
             </p>
           ) : null}

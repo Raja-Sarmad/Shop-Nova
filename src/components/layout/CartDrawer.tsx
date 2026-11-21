@@ -37,7 +37,7 @@ export function CartDrawer() {
           {cart.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center text-center">
               <p className="font-display text-3xl">Your bag is empty</p>
-              <p className="mt-2 text-sm text-ink-soft">Start with the linen edit or evening atelier.</p>
+              <p className="mt-2 text-sm text-ink-soft">Find a new favourite scent or your next everyday pair.</p>
               <Link
                 href="/shop"
                 onClick={() => setCartOpen(false)}

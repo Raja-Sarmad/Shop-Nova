@@ -1,83 +1,124 @@
 import Link from "next/link";
+import { ArrowRight, Camera, Leaf } from "lucide-react";
 import { BRAND } from "@/lib/constants";
 
-const columns = [
+const footerColumns = [
   {
     title: "Shop",
     links: [
-      { href: "/shop", label: "All products" },
-      { href: "/shop?category=apparel", label: "Apparel" },
-      { href: "/shop?category=shoes", label: "Shoes" },
-      { href: "/shop?category=bags", label: "Bags" },
-      { href: "/shop?category=jewelry", label: "Jewelry" },
-      { href: "/shop?category=home", label: "Home" },
+      ["Perfumes", "/shop?category=fragrance"],
+      ["Shoes", "/shop?category=shoes"],
+      ["New Arrivals", "/shop?sort=newest"],
+      ["Best Sellers", "/shop?sort=rating"],
+      ["Sale", "/shop?sort=price-asc"],
+      ["Offers", "/#offer"],
     ],
   },
   {
-    title: "House",
+    title: "Help",
     links: [
-      { href: "/about", label: "Our atelier" },
-      { href: "/journal", label: "Journal" },
-      { href: "/lookbook", label: "Lookbook" },
-      { href: "/collections", label: "Collections" },
-      { href: "/contact", label: "Visit / contact" },
+      ["Track Order", "/account/orders"],
+      ["Returns & Refunds", "/returns"],
+      ["Shipping Info", "/shipping"],
+      ["Size Guide", "/faq"],
+      ["Fragrance Guide", "/journal"],
+      ["FAQ", "/faq"],
     ],
   },
   {
-    title: "Care",
+    title: "About",
     links: [
-      { href: "/shipping", label: "Shipping" },
-      { href: "/returns", label: "Returns" },
-      { href: "/faq", label: "FAQ" },
-      { href: "/privacy", label: "Privacy" },
-      { href: "/terms", label: "Terms" },
+      ["Our Story", "/about"],
+      ["Contact Us", "/contact"],
+      ["Store Locator", "/contact"],
+      ["Blog", "/journal"],
+      ["Careers", "/contact"],
     ],
   },
 ];
 
-export function Footer() {
+export function Footer({ inline = false }: { inline?: boolean }) {
   return (
-    <footer className="mt-24 border-t border-sand bg-cream">
-      <div className="container-page grid gap-12 py-16 md:grid-cols-2 lg:grid-cols-5">
-        <div className="lg:col-span-2">
-          <p className="font-display text-3xl tracking-[0.22em]">{BRAND.name}</p>
-          <p className="mt-4 max-w-sm text-sm leading-7 text-ink-soft">
-            Quiet luxury cut in Lahore. Natural fibres, small runs, and objects
-            that earn their keep.
+    <footer
+      className={`site-footer bg-[#191817] text-white ${inline ? "mt-0 rounded-lg xl:mt-auto" : ""}`}
+    >
+      <div className="mx-auto grid w-full max-w-[1800px] gap-10 px-4 py-12 sm:grid-cols-2 sm:px-6 lg:grid-cols-[1.35fr_0.75fr_0.85fr_0.85fr_1.15fr] xl:px-10 2xl:px-14">
+        <div>
+          <Link
+            href="/"
+            className="flex items-center gap-2.5 font-display text-3xl font-semibold"
+          >
+            <Leaf size={26} className="fill-[#c08c3e] text-[#c08c3e]" />
+            {BRAND.name}
+          </Link>
+          <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-white/75">
+            <Link href="/shop?category=fragrance">Perfumes</Link>
+            <span className="text-white/30">|</span>
+            <Link href="/shop?category=shoes">Shoes</Link>
+            <span className="text-white/30">|</span>
+            <Link href="/shop">Lifestyle</Link>
+          </div>
+          <p className="mt-4 max-w-sm text-[15px] leading-7 text-white/65">
+            A premium destination for luxury perfumes and modern footwear, curated for every
+            generation.
           </p>
-          <form className="mt-8 flex max-w-md border-b border-ink/20">
-            <input
-              type="email"
-              placeholder="Email for atelier notes"
-              className="w-full bg-transparent py-3 text-sm outline-none placeholder:text-muted"
-            />
-            <button type="button" className="px-2 text-xs tracking-[0.18em] uppercase">
-              Join
-            </button>
-          </form>
+          <Link
+            href="https://instagram.com"
+            className="mt-4 inline-flex text-white/80 hover:text-white"
+            aria-label="Instagram"
+          >
+            <Camera size={20} />
+          </Link>
         </div>
-        {columns.map((col) => (
-          <div key={col.title}>
-            <p className="text-[11px] tracking-[0.22em] uppercase text-muted">{col.title}</p>
-            <ul className="mt-5 space-y-3">
-              {col.links.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-ink-soft transition-colors hover:text-ink"
-                  >
-                    {link.label}
+        {footerColumns.map((column) => (
+          <div key={column.title}>
+            <h2 className="text-base font-semibold tracking-wide">{column.title}</h2>
+            <ul className="mt-4 space-y-2.5">
+              {column.links.map(([label, href]) => (
+                <li key={label}>
+                  <Link href={href} className="text-[15px] text-white/65 hover:text-white">
+                    {label}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
         ))}
+        <div>
+          <h2 className="text-base font-semibold tracking-wide">Stay Updated</h2>
+          <form className="mt-4 flex overflow-hidden rounded-xl bg-white">
+            <input
+              type="email"
+              aria-label="Email address"
+              placeholder="Enter your email address"
+              className="min-w-0 flex-1 px-3.5 py-3 text-sm text-[#221e19] outline-none"
+            />
+            <button type="button" aria-label="Subscribe" className="px-3.5 text-[#211a12]">
+              <ArrowRight size={16} />
+            </button>
+          </form>
+          <p className="mt-4 text-sm text-white/60">Secure payments</p>
+          <div className="mt-2 flex flex-wrap gap-1.5 text-[11px] font-bold text-[#25201b]">
+            {["VISA", "Mastercard", "easypaisa", "JazzCash", "COD"].map((payment) => (
+              <span key={payment} className="rounded-md bg-white px-2 py-1.5">
+                {payment}
+              </span>
+            ))}
+          </div>
+        </div>
       </div>
-      <div className="border-t border-sand">
-        <div className="container-page flex flex-col gap-3 py-6 text-xs text-muted sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} {BRAND.name}. Atelier, Lahore.</p>
-          <p>{BRAND.address} · {BRAND.phone}</p>
+      <div className="border-t border-white/15">
+        <div className="mx-auto flex w-full max-w-[1800px] flex-col gap-3 px-4 py-5 text-sm text-white/60 sm:flex-row sm:items-center sm:justify-between sm:px-6 xl:px-10 2xl:px-14">
+          <p>
+            © {new Date().getFullYear()} {BRAND.name}. All rights reserved.
+          </p>
+          <div className="flex flex-wrap gap-4">
+            <Link href="/privacy">Privacy Policy</Link>
+            <span className="text-white/25">|</span>
+            <Link href="/terms">Terms &amp; Conditions</Link>
+            <span className="text-white/25">|</span>
+            <Link href="/returns">Return &amp; Refund Policy</Link>
+          </div>
         </div>
       </div>
     </footer>

@@ -1,28 +1,26 @@
 export const BRAND = {
-  name: "VELORA",
-  tagline: "Quiet luxury, everyday.",
-  email: "atelier@velora.store",
+  name: "Shop Nova",
+  tagline: "A scent. A step. A signature.",
+  email: "support@shopnova.pk",
   phone: "+92 300 555 0148",
   address: "12 A, MM Alam Road, Lahore",
 };
 
-export const FREE_SHIPPING_THRESHOLD = 15000;
+export const FREE_SHIPPING_THRESHOLD = 10000;
 export const FLAT_SHIPPING = 350;
 
 export const NAV = [
-  { href: "/shop", label: "Shop" },
-  { href: "/collections", label: "Collections" },
-  { href: "/lookbook", label: "Lookbook" },
-  { href: "/journal", label: "Journal" },
-  { href: "/about", label: "About" },
+  { href: "/", label: "Home" },
+  { href: "/shop?category=fragrance", label: "Perfumes" },
+  { href: "/shop?category=shoes", label: "Shoes" },
+  { href: "/shop?sort=newest", label: "New Arrivals" },
+  { href: "/shop?sort=price-asc", label: "Sale" },
+  { href: "/#offer", label: "Offers" },
 ];
 
 export const CATEGORIES = [
-  { slug: "apparel", label: "Apparel" },
   { slug: "shoes", label: "Shoes" },
-  { slug: "bags", label: "Bags" },
-  { slug: "jewelry", label: "Jewelry" },
-  { slug: "home", label: "Home" },
+  { slug: "fragrance", label: "Perfumes" },
 ] as const;
 
 export const SORT_OPTIONS = [

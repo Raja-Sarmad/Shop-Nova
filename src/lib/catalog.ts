@@ -20,9 +20,14 @@ const API = process.env.NEXT_PUBLIC_API_URL;
 
 async function fromApi<T>(path: string): Promise<T | null> {
   if (!API) return null;
-  const res = await fetch(`${API}${path}`, { next: { revalidate: 60 } });
-  if (!res.ok) return null;
-  return res.json() as Promise<T>;
+  try {
+    // no-store so dashboard create / edit / delete shows immediately on the shop
+    const res = await fetch(`${API}${path}`, { cache: "no-store" });
+    if (!res.ok) return null;
+    return (await res.json()) as T;
+  } catch {
+    return null;
+  }
 }
 
 function applyFilters(list: Product[], filters: ProductFilters = {}) {
@@ -85,13 +90,19 @@ function applyFilters(list: Product[], filters: ProductFilters = {}) {
 }
 
 export async function getProducts(filters: ProductFilters = {}): Promise<Product[]> {
-  const remote = await fromApi<Product[]>(`/products`);
-  return applyFilters(remote ?? products, filters);
+  const remote = await fromApi<{ products: Product[] }>(`/products`);
+  // Prefer API only when configured — never mix deleted Mongo items with mock catalog
+  if (API) {
+    return applyFilters(remote?.products ?? [], filters);
+  }
+  return applyFilters(products, filters);
 }
 
 export async function getProduct(slug: string): Promise<Product | undefined> {
-  const remote = await fromApi<Product>(`/products/${slug}`);
-  if (remote) return remote;
+  if (API) {
+    const remote = await fromApi<{ product: Product }>(`/products/slug/${slug}`);
+    return remote?.product;
+  }
   return products.find((p) => p.slug === slug);
 }
 
@@ -101,23 +112,23 @@ export async function getRelated(product: Product, limit = 4): Promise<Product[]
 }
 
 export async function getCollections(): Promise<Collection[]> {
-  const remote = await fromApi<Collection[]>(`/collections`);
-  return remote ?? collections;
+  const remote = await fromApi<{ collections: Collection[] }>(`/collections`);
+  return remote?.collections ?? collections;
 }
 
 export async function getCollection(slug: string): Promise<Collection | undefined> {
+  const remote = await fromApi<{ collection: Collection }>(`/collections/${slug}`);
+  if (remote?.collection) return remote.collection;
   const list = await getCollections();
   return list.find((c) => c.slug === slug);
 }
 
 export async function getReviews(productId: string): Promise<Review[]> {
-  const remote = await fromApi<Review[]>(`/products/${productId}/reviews`);
-  return remote ?? reviews.filter((r) => r.productId === productId);
+  return reviews.filter((r) => r.productId === productId);
 }
 
 export async function getJournal(): Promise<JournalPost[]> {
-  const remote = await fromApi<JournalPost[]>(`/journal`);
-  return remote ?? journalPosts;
+  return journalPosts;
 }
 
 export async function getJournalPost(slug: string): Promise<JournalPost | undefined> {
@@ -138,7 +149,7 @@ export function getLookbook() {
 }
 
 export function getCategories(): Category[] {
-  return ["apparel", "shoes", "bags", "jewelry", "home"];
+  return ["shoes", "fragrance"];
 }
 
 export function getAllColors() {

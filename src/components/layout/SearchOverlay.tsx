@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Search, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { products } from "@/lib/data/catalog-data";
 import { formatPrice } from "@/lib/format";
@@ -14,9 +14,10 @@ export function SearchOverlay() {
   const [query, setQuery] = useState("");
   const router = useRouter();
 
-  useEffect(() => {
-    if (!searchOpen) setQuery("");
-  }, [searchOpen]);
+  const closeSearch = () => {
+    setQuery("");
+    setSearchOpen(false);
+  };
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -44,15 +45,15 @@ export function SearchOverlay() {
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
-                setSearchOpen(false);
+                closeSearch();
                 router.push(`/search?q=${encodeURIComponent(query)}`);
               }
-              if (e.key === "Escape") setSearchOpen(false);
+              if (e.key === "Escape") closeSearch();
             }}
-            placeholder="Search linen, silk, loafers…"
+            placeholder="Search perfume, loafers, sandals…"
             className="w-full bg-transparent font-display text-3xl outline-none placeholder:text-mist md:text-5xl"
           />
-          <button type="button" onClick={() => setSearchOpen(false)} aria-label="Close search">
+          <button type="button" onClick={closeSearch} aria-label="Close search">
             <X size={22} />
           </button>
         </div>
@@ -60,7 +61,7 @@ export function SearchOverlay() {
           <div>
             <p className="text-[11px] tracking-[0.22em] uppercase text-muted">Suggestions</p>
             <div className="mt-4 flex flex-col gap-2">
-              {["linen", "silk", "loafers", "jewelry", "home"].map((term) => (
+              {["amber", "rose", "oud", "loafers", "sneakers"].map((term) => (
                 <button
                   key={term}
                   type="button"
@@ -77,7 +78,7 @@ export function SearchOverlay() {
               <li key={p.id}>
                 <Link
                   href={`/product/${p.slug}`}
-                  onClick={() => setSearchOpen(false)}
+                  onClick={closeSearch}
                   className="flex gap-4"
                 >
                   <div className="relative h-24 w-20 overflow-hidden bg-sand">

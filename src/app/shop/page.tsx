@@ -5,7 +5,7 @@ import { ShopCatalog } from "@/components/shop/ShopCatalog";
 
 export const metadata: Metadata = {
   title: "Shop",
-  description: "The full Velora catalog — apparel, shoes, bags, jewelry, and home.",
+  description: "Explore Shop Nova perfumes and shoes, selected for everyday rituals and memorable nights.",
 };
 
 export default async function ShopPage() {
@@ -19,7 +19,7 @@ export default async function ShopPage() {
         products={products}
         colors={colors}
         sizes={sizes}
-        subtitle="Filter by fibre, silhouette, and scale. Every piece is cut in small runs from the Lahore atelier."
+        subtitle="Explore considered fragrances and everyday shoes, selected to make getting ready feel like your own ritual."
       />
     </Suspense>
   );

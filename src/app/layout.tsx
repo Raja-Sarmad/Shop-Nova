@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Outfit } from "next/font/google";
+import { Fraunces, Manrope } from "next/font/google";
 import { StoreProvider } from "@/context/StoreProvider";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -8,15 +8,16 @@ import { SearchOverlay } from "@/components/layout/SearchOverlay";
 import { BRAND } from "@/lib/constants";
 import "./globals.css";
 
-const display = Cormorant_Garamond({
+const display = Fraunces({
   subsets: ["latin"],
   variable: "--font-display",
   weight: ["400", "500", "600", "700"],
 });
 
-const sans = Outfit({
+const sans = Manrope({
   subsets: ["latin"],
   variable: "--font-sans",
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -25,7 +26,7 @@ export const metadata: Metadata = {
     template: `%s · ${BRAND.name}`,
   },
   description:
-    "Quiet luxury cut in Lahore. Linen, silk, leather, and objects for a considered wardrobe.",
+    "Thoughtful perfumes and beautifully made shoes for everyday rituals and memorable nights. Based in Lahore, Pakistan.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
