@@ -3,24 +3,9 @@ import Link from "next/link";
 import { ArrowRight, BadgeCheck, CreditCard, Gem, ShieldCheck, Truck } from "lucide-react";
 import { getProducts, getTestimonials } from "@/lib/catalog";
 import { ManagedNewArrivals } from "@/components/home/ManagedNewArrivals";
+import { CategoryProductRail } from "@/components/home/CategoryProductRail";
 import { HeroSlider } from "@/components/home/HeroSlider";
-
-const collections = [
-  { title: "Oud Collection", subtitle: "Rich & long lasting", image: "photo-1594035910387-fea47794261f", href: "/shop?category=fragrance" },
-  { title: "Gift Sets", subtitle: "Perfect for gifting", image: "photo-1608571423902-eed4a5ad8108", href: "/shop?category=fragrance" },
-  { title: "Sneaker Edit", subtitle: "Trendy & versatile", image: "photo-1549298916-b41d501d3772", href: "/shop?category=shoes" },
-  { title: "Formal Collection", subtitle: "Elegance in every step", image: "photo-1614252235816-8c852fd85888", href: "/shop?category=shoes" },
-];
-
-const instagramShots = [
-  "photo-1594035910387-fea47794261f",
-  "photo-1549298916-b41d501d3772",
-  "photo-1615634260167-c8cdede054de",
-  "photo-1614252235816-8c852fd85888",
-  "photo-1535713875002-d1d0cf377fde",
-  "photo-1608571423902-eed4a5ad8108",
-  "photo-1534528741775-53994a69daeb",
-];
+import type { Product } from "@/lib/types";
 
 const pad = "mx-auto w-full max-w-[1800px] px-4 sm:px-6 xl:px-10 2xl:px-14";
 
@@ -42,18 +27,94 @@ function SectionTitle({ title, href }: { title: string; href?: string }) {
   );
 }
 
+function pickImage(products: Product[], category?: Product["category"], fallback: string) {
+  const match = products.find(
+    (product) =>
+      product.images?.[0] && (!category || product.category === category),
+  );
+  return match?.images[0] ?? fallback;
+}
+
 export default async function HomePage() {
   const [allProducts, testimonials] = await Promise.all([
     getProducts(),
     Promise.resolve(getTestimonials()),
   ]);
 
+  const perfumes = allProducts.filter((p) => p.category === "fragrance");
+  const shoes = allProducts.filter((p) => p.category === "shoes");
+  const galleryImages = allProducts
+    .map((p) => p.images[0])
+    .filter(Boolean)
+    .slice(0, 7);
+
+  const perfumeBanner = pickImage(
+    perfumes,
+    "fragrance",
+    "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=1400&q=80",
+  );
+  const shoesBanner = pickImage(
+    shoes,
+    "shoes",
+    "https://images.unsplash.com/photo-1614252235816-8c852fd85888?auto=format&fit=crop&w=1400&q=80",
+  );
+  const offerImage = pickImage(
+    allProducts,
+    undefined,
+    "https://images.unsplash.com/photo-1615634260167-c8cdede054de?auto=format&fit=crop&w=2000&q=80",
+  );
+
+  const collections = [
+    {
+      title: "Perfume edit",
+      subtitle: "Scents from your catalog",
+      image: pickImage(
+        perfumes,
+        "fragrance",
+        "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=700&q=80",
+      ),
+      href: "/shop?category=fragrance",
+    },
+    {
+      title: "Signature notes",
+      subtitle: "Long-lasting picks",
+      image:
+        perfumes[1]?.images[0] ||
+        pickImage(
+          perfumes,
+          "fragrance",
+          "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=700&q=80",
+        ),
+      href: "/shop?category=fragrance",
+    },
+    {
+      title: "Footwear edit",
+      subtitle: "Steps from your catalog",
+      image: pickImage(
+        shoes,
+        "shoes",
+        "https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=700&q=80",
+      ),
+      href: "/shop?category=shoes",
+    },
+    {
+      title: "Everyday shoes",
+      subtitle: "Clean and versatile",
+      image:
+        shoes[1]?.images[0] ||
+        pickImage(
+          shoes,
+          "shoes",
+          "https://images.unsplash.com/photo-1614252235816-8c852fd85888?auto=format&fit=crop&w=700&q=80",
+        ),
+      href: "/shop?category=shoes",
+    },
+  ];
+
   return (
     <div className="home-storefront w-full bg-[#faf7f2]">
-      {/* Hero — full desktop bleed */}
-      <HeroSlider />
+      <HeroSlider products={allProducts} />
 
-      {/* Trust — full width bar */}
       <section className="w-full bg-[#201b17] text-white">
         <div className={`${pad} grid grid-cols-2 gap-5 py-6 sm:grid-cols-4 sm:gap-6 sm:py-7`}>
           {[
@@ -76,43 +137,32 @@ export default async function HomePage() {
       </section>
 
       <div className="flex w-full flex-col gap-10 py-8 sm:gap-12 sm:py-12 lg:gap-14 lg:py-14">
-        {/* Offer — full width */}
-        <section id="offer" className="relative w-full min-h-[260px] overflow-hidden bg-[#241b16] text-white sm:min-h-[300px] lg:min-h-[320px]">
+        <section
+          id="offer"
+          className="relative w-full min-h-[260px] overflow-hidden bg-[#241b16] text-white sm:min-h-[300px] lg:min-h-[320px]"
+        >
           <Image
-            src="https://images.unsplash.com/photo-1615634260167-c8cdede054de?auto=format&fit=crop&w=2000&q=80"
+            src={offerImage}
             alt="Limited time offer"
             fill
             sizes="100vw"
             className="object-cover object-center opacity-50"
+            unoptimized={offerImage.includes("res.cloudinary.com")}
           />
           <div className="absolute inset-0 bg-gradient-to-r from-[#1d1511]/95 via-[#1d1511]/70 to-[#1d1511]/20" />
-          <div className={`${pad} relative flex min-h-[260px] items-center py-10 sm:min-h-[300px] lg:min-h-[320px]`}>
+          <div
+            className={`${pad} relative flex min-h-[260px] items-center py-10 sm:min-h-[300px] lg:min-h-[320px]`}
+          >
             <div className="max-w-xl">
-              <p className="font-display text-xl italic text-[#e5cb9d] sm:text-2xl">Limited-Time Offer</p>
+              <p className="font-display text-xl italic text-[#e5cb9d] sm:text-2xl">
+                Limited-Time Offer
+              </p>
               <h2 className="mt-1 font-display text-5xl font-semibold leading-none sm:text-6xl">
                 Up to 30% Off
               </h2>
               <p className="mt-4 text-base text-white/85 sm:text-lg">
-                On selected perfumes &amp; shoes
+                On selected perfumes &amp; shoes from your live catalog
               </p>
-              <div className="mt-6 flex flex-wrap gap-2.5">
-                {[
-                  ["02", "Days"],
-                  ["14", "Hours"],
-                  ["36", "Minutes"],
-                  ["28", "Seconds"],
-                ].map(([value, label]) => (
-                  <div
-                    key={label}
-                    className="min-w-[64px] rounded-lg border border-white/40 px-3 py-2.5 text-center"
-                  >
-                    <span className="block font-display text-2xl leading-none">{value}</span>
-                    <span className="mt-1.5 block text-[11px] uppercase tracking-wide text-white/70">
-                      {label}
-                    </span>
-                  </div>
-                ))}
-              </div>
               <Link
                 href="/shop"
                 className="mt-7 inline-flex items-center gap-2 rounded-lg bg-[#d4ae69] px-6 py-3 text-sm font-semibold text-[#21180f]"
@@ -123,24 +173,29 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* Categories */}
         <section className={`${pad} grid gap-4 md:grid-cols-2 lg:gap-5`}>
           <Link
             href="/shop?category=fragrance"
-            className="group relative flex min-h-[260px] items-center overflow-hidden bg-[#eee0ce] p-8 lg:min-h-[320px] lg:p-10"
+            className="group relative flex min-h-[280px] items-center overflow-hidden bg-[#eee0ce] p-8 lg:min-h-[340px] lg:p-10"
           >
             <Image
-              src="https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=1400&q=80"
+              src={perfumeBanner}
               alt="Perfumes"
               fill
               sizes="50vw"
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
+              unoptimized={perfumeBanner.includes("res.cloudinary.com")}
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#f2e8dc]/96 via-[#f2e8dc]/80 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#f2e8dc]/96 via-[#f2e8dc]/75 to-transparent" />
             <div className="relative max-w-[70%]">
-              <h2 className="font-display text-4xl font-bold text-[#171411] lg:text-5xl">Perfumes</h2>
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#8a6230]">
+                Fragrance
+              </p>
+              <h2 className="mt-2 font-display text-4xl font-bold text-[#171411] lg:text-5xl">
+                Perfumes
+              </h2>
               <p className="mt-3 max-w-sm text-base leading-relaxed text-[#352c23]">
-                Luxury fragrances, oud, attars and more for every occasion.
+                Luxury fragrances curated from your dashboard — only live products show here.
               </p>
               <span className="mt-6 inline-flex items-center gap-2 rounded-lg bg-[#ad7938] px-5 py-3 text-sm font-semibold text-white">
                 Explore Perfumes <ArrowRight size={15} />
@@ -149,20 +204,26 @@ export default async function HomePage() {
           </Link>
           <Link
             href="/shop?category=shoes"
-            className="group relative flex min-h-[260px] items-center overflow-hidden bg-[#e9e0d7] p-8 lg:min-h-[320px] lg:p-10"
+            className="group relative flex min-h-[280px] items-center overflow-hidden bg-[#e9e0d7] p-8 lg:min-h-[340px] lg:p-10"
           >
             <Image
-              src="https://images.unsplash.com/photo-1614252235816-8c852fd85888?auto=format&fit=crop&w=1400&q=80"
+              src={shoesBanner}
               alt="Shoes"
               fill
               sizes="50vw"
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
+              unoptimized={shoesBanner.includes("res.cloudinary.com")}
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#f4eee7]/96 via-[#f4eee7]/80 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#f4eee7]/96 via-[#f4eee7]/75 to-transparent" />
             <div className="relative max-w-[70%]">
-              <h2 className="font-display text-4xl font-bold text-[#171411] lg:text-5xl">Shoes</h2>
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#8a6230]">
+                Footwear
+              </p>
+              <h2 className="mt-2 font-display text-4xl font-bold text-[#171411] lg:text-5xl">
+                Shoes
+              </h2>
               <p className="mt-3 max-w-sm text-base leading-relaxed text-[#352c23]">
-                Sneakers, formal, casual and sports shoes for every style.
+                Sneakers, formals and everyday pairs — powered by the products you publish.
               </p>
               <span className="mt-6 inline-flex items-center gap-2 rounded-lg bg-[#ad7938] px-5 py-3 text-sm font-semibold text-white">
                 Explore Shoes <ArrowRight size={15} />
@@ -171,7 +232,6 @@ export default async function HomePage() {
           </Link>
         </section>
 
-        {/* Collections */}
         <section className={pad}>
           <SectionTitle title="Featured Collections" href="/shop" />
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:gap-4">
@@ -179,14 +239,15 @@ export default async function HomePage() {
               <Link
                 key={item.title}
                 href={item.href}
-                className="group relative flex min-h-[160px] items-end overflow-hidden bg-[#f8f4ee] p-5 lg:min-h-[200px]"
+                className="group relative flex min-h-[170px] items-end overflow-hidden bg-[#f8f4ee] p-5 lg:min-h-[210px]"
               >
                 <Image
-                  src={`https://images.unsplash.com/${item.image}?auto=format&fit=crop&w=700&q=80`}
+                  src={item.image}
                   alt=""
                   fill
                   sizes="25vw"
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  unoptimized={item.image.includes("res.cloudinary.com")}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
                 <div className="relative text-white">
@@ -198,31 +259,35 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* New arrivals */}
+        <CategoryProductRail
+          initialProducts={allProducts}
+          category="fragrance"
+          title="Perfumes"
+          href="/shop?category=fragrance"
+        />
+
+        <CategoryProductRail
+          initialProducts={allProducts}
+          category="shoes"
+          title="Shoes"
+          href="/shop?category=shoes"
+        />
+
         <section className={pad}>
           <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
             <h2 className="font-display text-3xl font-bold text-[#201c18] sm:text-4xl lg:text-[40px]">
               New Arrivals
             </h2>
-            <div className="flex flex-wrap items-center gap-3 text-sm">
-              <Link href="/shop" className="rounded-lg bg-[#1d1b19] px-4 py-2.5 text-white">
-                All
-              </Link>
-              <Link href="/shop?category=fragrance" className="hover:text-[#9b6b2d]">
-                Perfumes
-              </Link>
-              <Link href="/shop?category=shoes" className="hover:text-[#9b6b2d]">
-                Shoes
-              </Link>
-              <Link href="/shop?sort=newest" className="inline-flex items-center gap-1.5 hover:text-[#9b6b2d]">
-                View All <ArrowRight size={14} />
-              </Link>
-            </div>
+            <Link
+              href="/shop?sort=newest"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-[#655d54] hover:text-[#a26a22]"
+            >
+              View All <ArrowRight size={14} />
+            </Link>
           </div>
           <ManagedNewArrivals initialProducts={allProducts} />
         </section>
 
-        {/* Reviews */}
         <section className={pad}>
           <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
             <h2 className="font-display text-3xl font-bold text-[#201c18] sm:text-4xl lg:text-[40px]">
@@ -264,17 +329,21 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* Our story */}
         <section className={pad}>
           <SectionTitle title="Our Story" href="/about" />
           <div className="grid items-stretch overflow-hidden border border-[#ece7df] bg-white sm:grid-cols-2">
             <div className="relative min-h-[280px] bg-[#dac8a9] lg:min-h-[380px]">
               <Image
-                src="https://images.unsplash.com/photo-1607082349566-187342175e2f?auto=format&fit=crop&w=1200&q=80"
+                src={pickImage(
+                  allProducts,
+                  undefined,
+                  "https://images.unsplash.com/photo-1607082349566-187342175e2f?auto=format&fit=crop&w=1200&q=80",
+                )}
                 alt="Shop Nova story"
                 fill
                 sizes="50vw"
                 className="object-cover"
+                unoptimized
               />
             </div>
             <div className="flex flex-col justify-center px-6 py-8 sm:px-10 lg:px-14 lg:py-12">
@@ -283,10 +352,7 @@ export default async function HomePage() {
               </h3>
               <p className="mt-5 text-base leading-8 text-[#49423a]">
                 Shop Nova brings together luxury fragrances and modern footwear in one carefully
-                curated store — built for everyday rituals and memorable nights.
-              </p>
-              <p className="mt-3 text-base leading-8 text-[#49423a]">
-                We believe style should feel personal, timeless, authentic, and accessible.
+                curated store — and the homepage now shows the products you actually publish.
               </p>
               <Link
                 href="/about"
@@ -298,48 +364,59 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* Instagram */}
         <section className={pad}>
           <div className="mb-6 flex items-end justify-between gap-3">
             <h2 className="font-display text-3xl font-bold text-[#201c18] sm:text-4xl lg:text-[40px]">
-              Follow Us on Instagram
+              From the collection
             </h2>
-            <Link href="https://instagram.com" className="text-sm text-[#5f5850] hover:text-[#a26a22]">
-              @shopnovastore
+            <Link href="/shop" className="text-sm text-[#5f5850] hover:text-[#a26a22]">
+              Browse shop
             </Link>
           </div>
           <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-7 lg:gap-3">
-            {instagramShots.map((image, index) => (
+            {(galleryImages.length
+              ? galleryImages
+              : [
+                  "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=400&h=400&q=75",
+                  "https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=400&h=400&q=75",
+                  "https://images.unsplash.com/photo-1614252235816-8c852fd85888?auto=format&fit=crop&w=400&h=400&q=75",
+                ]
+            ).map((image, index) => (
               <Link
-                key={image}
-                href="https://instagram.com"
-                aria-label={`Instagram ${index + 1}`}
+                key={`${image}-${index}`}
+                href="/shop"
+                aria-label={`Product gallery ${index + 1}`}
                 className="relative aspect-square overflow-hidden bg-[#eee8df]"
               >
                 <Image
-                  src={`https://images.unsplash.com/${image}?auto=format&fit=crop&w=400&h=400&q=75`}
+                  src={image}
                   alt=""
                   fill
                   sizes="14vw"
                   className="object-cover transition-transform duration-500 hover:scale-110"
+                  unoptimized={image.includes("res.cloudinary.com")}
                 />
               </Link>
             ))}
           </div>
         </section>
 
-        {/* Newsletter — full bleed */}
         <section className="relative w-full overflow-hidden bg-[#30251b] text-white">
           <Image
-            src="https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?auto=format&fit=crop&w=1800&q=75"
+            src={offerImage}
             alt=""
             fill
             sizes="100vw"
             className="object-cover opacity-25"
+            unoptimized={offerImage.includes("res.cloudinary.com")}
           />
-          <div className={`${pad} relative flex flex-col gap-5 py-12 sm:flex-row sm:items-center sm:justify-between sm:py-14`}>
+          <div
+            className={`${pad} relative flex flex-col gap-5 py-12 sm:flex-row sm:items-center sm:justify-between sm:py-14`}
+          >
             <div>
-              <h2 className="font-display text-3xl font-semibold lg:text-4xl">Join Our Newsletter</h2>
+              <h2 className="font-display text-3xl font-semibold lg:text-4xl">
+                Join Our Newsletter
+              </h2>
               <p className="mt-2 text-base text-white/80">
                 Exclusive offers, new arrivals, and style updates.
               </p>
