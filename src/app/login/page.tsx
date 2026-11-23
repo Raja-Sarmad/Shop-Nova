@@ -6,6 +6,10 @@ import { useState } from "react";
 import { useStore } from "@/context/StoreProvider";
 import { customerApi, hasApi, setCustomerToken } from "@/lib/api-client";
 
+const DASHBOARD_URL = (
+  process.env.NEXT_PUBLIC_DASHBOARD_URL || "http://localhost:3001"
+).replace(/\/$/, "");
+
 export default function LoginPage() {
   const { login } = useStore();
   const router = useRouter();
@@ -20,8 +24,8 @@ export default function LoginPage() {
         <p className="text-[11px] tracking-[0.22em] uppercase text-muted">Account</p>
         <h1 className="mt-2 font-display text-5xl">Welcome back</h1>
         <p className="mt-4 max-w-md text-sm leading-7 text-ink-soft">
-          Customer login only. Admins use the dashboard at{" "}
-          <code className="text-ink">localhost:3001</code>.
+          Customers open their account here. Admin credentials automatically open the Shop Nova
+          dashboard.
         </p>
       </div>
       <form
@@ -39,9 +43,14 @@ export default function LoginPage() {
                 method: "POST",
                 body: JSON.stringify({ email, password }),
               });
+
               if (res.user.role === "admin") {
-                throw new Error("Admin accounts sign in on the dashboard, not the store.");
+                window.location.assign(
+                  `${DASHBOARD_URL}/login?token=${encodeURIComponent(res.token)}`,
+                );
+                return;
               }
+
               setCustomerToken(res.token);
               login({ name: res.user.name, email: res.user.email });
             } else {
