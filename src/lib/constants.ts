@@ -6,6 +6,12 @@ export const BRAND = {
   address: "12 A, MM Alam Road, Lahore",
 };
 
+export const SOCIAL = {
+  instagram: "https://instagram.com/shopnovastore",
+  facebook: "https://facebook.com/shopnovastore",
+  whatsapp: "https://wa.me/923005550148",
+};
+
 export const FREE_SHIPPING_THRESHOLD = 10000;
 export const FLAT_SHIPPING = 350;
 

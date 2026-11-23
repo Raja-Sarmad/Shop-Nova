@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CartDrawer } from "@/components/layout/CartDrawer";
 import { SearchOverlay } from "@/components/layout/SearchOverlay";
+import { SocialDock } from "@/components/layout/SocialDock";
 import { BRAND } from "@/lib/constants";
 import "./globals.css";
 
@@ -40,6 +41,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <Header />
           <main className="flex-1">{children}</main>
           <Footer />
+          <SocialDock />
           <CartDrawer />
           <SearchOverlay />
         </StoreProvider>
