@@ -48,8 +48,8 @@ export function useManagedProducts(initialProducts: Product[]) {
 
     refresh();
 
-    // Poll so dashboard create/edit/delete appears without full reload
-    const interval = API ? window.setInterval(refresh, 4000) : undefined;
+    // Poll often so dashboard create/edit/delete appears on the store quickly
+    const interval = API ? window.setInterval(refresh, 2000) : undefined;
 
     const onFocus = () => {
       void refresh();

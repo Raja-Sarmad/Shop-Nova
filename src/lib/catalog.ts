@@ -22,7 +22,10 @@ async function fromApi<T>(path: string): Promise<T | null> {
   if (!API) return null;
   try {
     // no-store so dashboard create / edit / delete shows immediately on the shop
-    const res = await fetch(`${API}${path}`, { cache: "no-store" });
+    const res = await fetch(`${API}${path}`, {
+      cache: "no-store",
+      next: { revalidate: 0 },
+    });
     if (!res.ok) return null;
     return (await res.json()) as T;
   } catch {

@@ -27,7 +27,11 @@ function SectionTitle({ title, href }: { title: string; href?: string }) {
   );
 }
 
-function pickImage(products: Product[], category?: Product["category"], fallback: string) {
+function pickImage(
+  products: Product[],
+  fallback: string,
+  category?: Product["category"],
+) {
   const match = products.find(
     (product) =>
       product.images?.[0] && (!category || product.category === category),
@@ -50,17 +54,16 @@ export default async function HomePage() {
 
   const perfumeBanner = pickImage(
     perfumes,
-    "fragrance",
     "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=1400&q=80",
+    "fragrance",
   );
   const shoesBanner = pickImage(
     shoes,
-    "shoes",
     "https://images.unsplash.com/photo-1614252235816-8c852fd85888?auto=format&fit=crop&w=1400&q=80",
+    "shoes",
   );
   const offerImage = pickImage(
     allProducts,
-    undefined,
     "https://images.unsplash.com/photo-1615634260167-c8cdede054de?auto=format&fit=crop&w=2000&q=80",
   );
 
@@ -70,8 +73,8 @@ export default async function HomePage() {
       subtitle: "Scents from your catalog",
       image: pickImage(
         perfumes,
-        "fragrance",
         "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=700&q=80",
+        "fragrance",
       ),
       href: "/shop?category=fragrance",
     },
@@ -82,8 +85,8 @@ export default async function HomePage() {
         perfumes[1]?.images[0] ||
         pickImage(
           perfumes,
-          "fragrance",
           "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=700&q=80",
+          "fragrance",
         ),
       href: "/shop?category=fragrance",
     },
@@ -92,8 +95,8 @@ export default async function HomePage() {
       subtitle: "Steps from your catalog",
       image: pickImage(
         shoes,
-        "shoes",
         "https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=700&q=80",
+        "shoes",
       ),
       href: "/shop?category=shoes",
     },
@@ -104,8 +107,8 @@ export default async function HomePage() {
         shoes[1]?.images[0] ||
         pickImage(
           shoes,
-          "shoes",
           "https://images.unsplash.com/photo-1614252235816-8c852fd85888?auto=format&fit=crop&w=700&q=80",
+          "shoes",
         ),
       href: "/shop?category=shoes",
     },
@@ -336,7 +339,6 @@ export default async function HomePage() {
               <Image
                 src={pickImage(
                   allProducts,
-                  undefined,
                   "https://images.unsplash.com/photo-1607082349566-187342175e2f?auto=format&fit=crop&w=1200&q=80",
                 )}
                 alt="Shop Nova story"
