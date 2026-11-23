@@ -35,6 +35,7 @@ type Store = {
   placeOrder: (input: {
     email: string;
     address: Omit<Address, "id" | "label">;
+    paymentMethod?: string;
   }) => Order;
   addAddress: (address: Address) => void;
   notify: (message: string) => void;
@@ -163,7 +164,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, [notify]);
 
   const placeOrder = useCallback(
-    (input: { email: string; address: Omit<Address, "id" | "label"> }) => {
+    (input: {
+      email: string;
+      address: Omit<Address, "id" | "label">;
+      paymentMethod?: string;
+    }) => {
       const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
       const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : FLAT_SHIPPING;
       const order: Order = {
@@ -176,6 +181,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         total: subtotal + shipping,
         email: input.email,
         address: input.address,
+        paymentMethod: input.paymentMethod,
       };
       setOrders((prev) => [order, ...prev]);
       const orderedQuantities = cart.reduce<Record<string, number>>((totals, item) => {

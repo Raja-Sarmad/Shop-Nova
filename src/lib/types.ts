@@ -94,6 +94,7 @@ export type Order = {
   total: number;
   email: string;
   address: Omit<Address, "id" | "label">;
+  paymentMethod?: string;
 };
 
 export type User = {

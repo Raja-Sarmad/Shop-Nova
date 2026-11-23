@@ -52,11 +52,17 @@ const items = [
 
 export function SocialDock() {
   const pathname = usePathname();
-  if (pathname.startsWith("/admin")) return null;
+  if (
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/checkout") ||
+    pathname.startsWith("/login")
+  ) {
+    return null;
+  }
 
   return (
     <div
-      className="pointer-events-none fixed top-1/2 left-0 z-[80] flex -translate-y-1/2 flex-col gap-3"
+      className="pointer-events-none fixed top-1/2 left-0 z-[80] hidden -translate-y-1/2 flex-col gap-3 sm:flex"
       aria-label="Social links"
     >
       {items.map(({ label, href, className, Icon }) => (

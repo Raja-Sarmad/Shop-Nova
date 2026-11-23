@@ -129,14 +129,14 @@ export function CartDrawer() {
             <Link
               href="/checkout"
               onClick={() => setCartOpen(false)}
-              className="flex h-12 items-center justify-center bg-ink text-xs tracking-[0.2em] uppercase text-cream"
+              className="flex h-12 items-center justify-center rounded-full bg-ink text-xs tracking-[0.2em] uppercase text-cream"
             >
               Checkout
             </Link>
             <Link
               href="/cart"
               onClick={() => setCartOpen(false)}
-              className="mt-3 flex h-11 items-center justify-center text-xs tracking-[0.18em] uppercase"
+              className="mt-3 flex h-11 items-center justify-center rounded-full text-xs tracking-[0.18em] uppercase"
             >
               View bag
             </Link>

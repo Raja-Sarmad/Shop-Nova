@@ -17,7 +17,13 @@ type Props = {
   subtitle?: string;
 };
 
-export function ShopCatalog({ products, colors, sizes, title = "The shop", subtitle }: Props) {
+export function ShopCatalog({
+  products,
+  colors,
+  sizes,
+  title = "The shop",
+  subtitle,
+}: Props) {
   const managedProducts = useManagedProducts(products);
   const router = useRouter();
   const pathname = usePathname();
@@ -38,9 +44,45 @@ export function ShopCatalog({ products, colors, sizes, title = "The shop", subti
     router.push(q ? `${pathname}?${q}` : pathname, { scroll: false });
   };
 
-  const filtered = useMemo(() => {
-    let list = [...managedProducts].filter((product) => product.stockQuantity === undefined || product.stockQuantity > 0);
+  const clearFilters = () => {
+    const next = new URLSearchParams();
+    if (sort && sort !== "featured") next.set("sort", sort);
+    const q = next.toString();
+    router.push(q ? `${pathname}?${q}` : pathname, { scroll: false });
+  };
+
+  const scopedProducts = useMemo(() => {
+    let list = managedProducts.filter(
+      (product) => product.stockQuantity === undefined || product.stockQuantity > 0,
+    );
     if (category !== "all") list = list.filter((p) => p.category === category);
+    return list;
+  }, [managedProducts, category]);
+
+  const availableColors = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const product of scopedProducts) {
+      for (const c of product.colors) {
+        if (!map.has(c.name)) map.set(c.name, c.hex);
+      }
+    }
+    if (map.size === 0) {
+      return colors;
+    }
+    return Array.from(map.entries()).map(([name, hex]) => ({ name, hex }));
+  }, [scopedProducts, colors]);
+
+  const availableSizes = useMemo(() => {
+    const set = new Set<string>();
+    for (const product of scopedProducts) {
+      for (const s of product.sizes) set.add(s);
+    }
+    if (set.size === 0) return sizes;
+    return Array.from(set).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+  }, [scopedProducts, sizes]);
+
+  const filtered = useMemo(() => {
+    let list = [...scopedProducts];
     if (color) list = list.filter((p) => p.colors.some((c) => c.name === color));
     if (size) list = list.filter((p) => p.sizes.includes(size));
     list = list.filter((p) => p.price <= max);
@@ -61,17 +103,34 @@ export function ShopCatalog({ products, colors, sizes, title = "The shop", subti
         list.sort((a, b) => Number(b.isBestseller) - Number(a.isBestseller));
     }
     return list;
-  }, [managedProducts, category, color, size, sort, max]);
+  }, [scopedProducts, color, size, sort, max]);
+
+  const activeFilterCount = [
+    category !== "all",
+    Boolean(color),
+    Boolean(size),
+    max < 40000,
+  ].filter(Boolean).length;
+
+  const heading =
+    category === "fragrance"
+      ? "Perfumes"
+      : category === "shoes"
+        ? "Shoes"
+        : title;
 
   const Filters = (
     <div className="space-y-8">
       <div>
         <p className="text-[11px] tracking-[0.22em] uppercase text-muted">Category</p>
-        <div className="mt-3 flex flex-col gap-2">
+        <div className="mt-3 flex flex-col gap-1">
           <button
             type="button"
             onClick={() => setParam("category", "all")}
-            className={cn("text-left text-sm", category === "all" ? "text-ink" : "text-ink-soft")}
+            className={cn(
+              "rounded-xl px-3 py-2 text-left text-sm transition",
+              category === "all" ? "bg-[#f4ebe0] font-medium text-ink" : "text-ink-soft hover:bg-[#f7f1e8]",
+            )}
           >
             All
           </button>
@@ -80,49 +139,69 @@ export function ShopCatalog({ products, colors, sizes, title = "The shop", subti
               key={c.slug}
               type="button"
               onClick={() => setParam("category", c.slug)}
-              className={cn("text-left text-sm", category === c.slug ? "text-ink" : "text-ink-soft")}
+              className={cn(
+                "rounded-xl px-3 py-2 text-left text-sm transition",
+                category === c.slug
+                  ? "bg-[#f4ebe0] font-medium text-ink"
+                  : "text-ink-soft hover:bg-[#f7f1e8]",
+              )}
             >
               {c.label}
             </button>
           ))}
         </div>
       </div>
-      <div>
-        <p className="text-[11px] tracking-[0.22em] uppercase text-muted">Colour</p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {colors.map((c) => (
-            <button
-              key={c.name}
-              type="button"
-              title={c.name}
-              onClick={() => setParam("color", color === c.name ? "" : c.name)}
-              className={cn(
-                "h-6 w-6 rounded-full border",
-                color === c.name ? "border-ink ring-1 ring-ink ring-offset-2" : "border-ink/10",
-              )}
-              style={{ backgroundColor: c.hex }}
-            />
-          ))}
+
+      {availableColors.length > 0 ? (
+        <div>
+          <p className="text-[11px] tracking-[0.22em] uppercase text-muted">
+            {category === "fragrance" ? "Notes / tone" : "Colour"}
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {availableColors.map((c) => (
+              <button
+                key={c.name}
+                type="button"
+                title={c.name}
+                onClick={() => setParam("color", color === c.name ? "" : c.name)}
+                className={cn(
+                  "h-7 w-7 rounded-full border transition",
+                  color === c.name
+                    ? "border-ink ring-1 ring-ink ring-offset-2"
+                    : "border-ink/10",
+                )}
+                style={{ backgroundColor: c.hex }}
+              />
+            ))}
+          </div>
         </div>
-      </div>
-      <div>
-        <p className="text-[11px] tracking-[0.22em] uppercase text-muted">Size</p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {sizes.map((s) => (
-            <button
-              key={s}
-              type="button"
-              onClick={() => setParam("size", size === s ? "" : s)}
-              className={cn(
-                "min-w-10 border px-2 py-1 text-xs",
-                size === s ? "border-ink bg-ink text-cream" : "border-sand",
-              )}
-            >
-              {s}
-            </button>
-          ))}
+      ) : null}
+
+      {availableSizes.length > 0 ? (
+        <div>
+          <p className="text-[11px] tracking-[0.22em] uppercase text-muted">
+            {category === "fragrance" ? "Volume" : "Size"}
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {availableSizes.map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => setParam("size", size === s ? "" : s)}
+                className={cn(
+                  "min-w-10 rounded-full border px-2.5 py-1.5 text-xs transition",
+                  size === s
+                    ? "border-ink bg-ink text-cream"
+                    : "border-sand hover:border-ink",
+                )}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      ) : null}
+
       <div>
         <p className="text-[11px] tracking-[0.22em] uppercase text-muted">
           Up to {formatPrice(max)}
@@ -137,32 +216,58 @@ export function ShopCatalog({ products, colors, sizes, title = "The shop", subti
           className="mt-3 w-full accent-terracotta"
         />
       </div>
+
+      {activeFilterCount > 0 ? (
+        <button
+          type="button"
+          onClick={clearFilters}
+          className="text-xs tracking-[0.16em] uppercase text-muted underline-offset-4 hover:text-ink hover:underline"
+        >
+          Clear filters
+        </button>
+      ) : null}
     </div>
   );
 
   return (
-    <div className="container-page py-10">
+    <div className="container-page py-8 sm:py-10">
       <div className="max-w-2xl">
         <p className="text-[11px] tracking-[0.22em] uppercase text-muted">Catalog</p>
-        <h1 className="mt-2 font-display text-5xl md:text-6xl">{title}</h1>
-        {subtitle ? <p className="mt-4 text-sm leading-7 text-ink-soft">{subtitle}</p> : null}
+        <h1 className="mt-2 font-display text-4xl sm:text-5xl md:text-6xl">{heading}</h1>
+        {subtitle ? (
+          <p className="mt-4 text-sm leading-7 text-ink-soft">{subtitle}</p>
+        ) : (
+          <p className="mt-4 text-sm leading-7 text-ink-soft">
+            {category === "fragrance"
+              ? "Signature scents curated for everyday and evening wear."
+              : category === "shoes"
+                ? "Footwear made for comfort, polish, and every step in between."
+                : "Explore perfumes and shoes in one clean shop."}
+          </p>
+        )}
       </div>
 
-      <div className="mt-10 flex items-center justify-between gap-4 border-y border-sand py-4">
+      <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-y border-sand py-4 sm:mt-10">
         <button
           type="button"
-          className="flex items-center gap-2 text-xs tracking-[0.16em] uppercase lg:hidden"
+          className="flex items-center gap-2 rounded-full border border-sand px-3.5 py-2 text-xs tracking-[0.16em] uppercase lg:hidden"
           onClick={() => setOpen(true)}
         >
-          <SlidersHorizontal size={14} /> Filters
+          <SlidersHorizontal size={14} />
+          Filters
+          {activeFilterCount > 0 ? (
+            <span className="grid h-5 min-w-5 place-items-center rounded-full bg-ink px-1 text-[10px] text-cream">
+              {activeFilterCount}
+            </span>
+          ) : null}
         </button>
         <p className="text-sm text-ink-soft">{filtered.length} pieces</p>
-        <label className="flex items-center gap-2 text-sm">
+        <label className="flex items-center gap-2 rounded-full border border-sand px-3 py-2 text-sm">
           <span className="hidden text-muted sm:inline">Sort</span>
           <select
             value={sort}
             onChange={(e) => setParam("sort", e.target.value)}
-            className="bg-transparent outline-none"
+            className="max-w-[160px] bg-transparent outline-none sm:max-w-none"
           >
             {SORT_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>
@@ -173,9 +278,23 @@ export function ShopCatalog({ products, colors, sizes, title = "The shop", subti
         </label>
       </div>
 
-      <div className="mt-10 grid gap-10 lg:grid-cols-[220px_1fr]">
+      <div className="mt-8 grid gap-8 lg:mt-10 lg:grid-cols-[240px_1fr] lg:gap-10">
         <aside className="hidden lg:block">{Filters}</aside>
-        <ProductGrid products={filtered} />
+        {filtered.length ? (
+          <ProductGrid products={filtered} />
+        ) : (
+          <div className="rounded-3xl border border-dashed border-sand px-6 py-16 text-center">
+            <p className="font-display text-2xl">No pieces match</p>
+            <p className="mt-2 text-sm text-ink-soft">Try clearing a filter or widening the price range.</p>
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="mt-6 text-xs tracking-[0.16em] uppercase underline"
+            >
+              Reset filters
+            </button>
+          </div>
+        )}
       </div>
 
       {open ? (
@@ -186,14 +305,21 @@ export function ShopCatalog({ products, colors, sizes, title = "The shop", subti
             onClick={() => setOpen(false)}
             aria-label="Close filters"
           />
-          <aside className="absolute top-0 left-0 h-full w-[86%] max-w-sm overflow-y-auto bg-ivory p-6 drawer-in">
+          <aside className="absolute top-0 left-0 flex h-full w-[88%] max-w-sm flex-col overflow-y-auto bg-ivory p-6 drawer-in">
             <div className="mb-8 flex items-center justify-between">
               <p className="font-display text-2xl">Filters</p>
-              <button type="button" onClick={() => setOpen(false)}>
+              <button type="button" onClick={() => setOpen(false)} aria-label="Close">
                 <X size={18} />
               </button>
             </div>
             {Filters}
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="mt-8 rounded-full bg-ink py-3.5 text-xs tracking-[0.18em] uppercase text-cream"
+            >
+              Show {filtered.length} results
+            </button>
           </aside>
         </div>
       ) : null}

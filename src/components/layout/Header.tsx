@@ -13,10 +13,107 @@ import {
   UserRound,
   X,
 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { BRAND, NAV } from "@/lib/constants";
+import { useEffect, useRef, useState } from "react";
+import { BRAND, NAV, type NavItem } from "@/lib/constants";
 import { cn } from "@/lib/format";
 import { useStore } from "@/context/StoreProvider";
+
+function NavLink({
+  item,
+  pathname,
+}: {
+  item: NavItem;
+  pathname: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const closeTimer = useRef<number | null>(null);
+  const active =
+    pathname === item.href ||
+    (item.href !== "/" && pathname.startsWith(item.href.split("?")[0]));
+  const hasDropdown = Boolean(item.children?.length);
+
+  const clearClose = () => {
+    if (closeTimer.current) window.clearTimeout(closeTimer.current);
+  };
+
+  const scheduleClose = () => {
+    clearClose();
+    closeTimer.current = window.setTimeout(() => setOpen(false), 120);
+  };
+
+  useEffect(() => () => clearClose(), []);
+
+  if (!hasDropdown) {
+    return (
+      <Link
+        href={item.href}
+        className={cn(
+          "rounded-full px-3.5 py-2 text-[15px] font-medium transition-colors xl:px-4 xl:text-base",
+          active
+            ? "bg-[#f4ebe0] text-[#8f5f22]"
+            : item.label === "Sale"
+              ? "text-[#b84532] hover:bg-[#faf3eb]"
+              : "text-[#2f2a24] hover:bg-[#f7f1e8] hover:text-[#8f5f22]",
+        )}
+      >
+        {item.label}
+      </Link>
+    );
+  }
+
+  return (
+    <div
+      className="relative"
+      onMouseEnter={() => {
+        clearClose();
+        setOpen(true);
+      }}
+      onMouseLeave={scheduleClose}
+    >
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        className={cn(
+          "inline-flex items-center gap-1 rounded-full px-3.5 py-2 text-[15px] font-medium transition-colors xl:px-4 xl:text-base",
+          open || active
+            ? "bg-[#f4ebe0] text-[#8f5f22]"
+            : "text-[#2f2a24] hover:bg-[#f7f1e8] hover:text-[#8f5f22]",
+        )}
+      >
+        {item.label}
+        <ChevronDown
+          size={15}
+          className={cn("opacity-70 transition-transform duration-300", open && "rotate-180")}
+        />
+      </button>
+      {open ? (
+        <div className="absolute top-full left-1/2 z-50 mt-3 w-72 -translate-x-1/2 rounded-2xl border border-[#eadfce] bg-white p-2 shadow-[0_20px_50px_rgba(40,28,16,0.14)]">
+          {item.children!.map((child) => (
+            <Link
+              key={child.href}
+              href={child.href}
+              onClick={() => setOpen(false)}
+              className="block rounded-xl px-3.5 py-3 transition-colors hover:bg-[#f7f1e8]"
+            >
+              <span className="block text-sm font-semibold text-[#241f1a]">{child.label}</span>
+              {child.hint ? (
+                <span className="mt-0.5 block text-xs text-[#7a7268]">{child.hint}</span>
+              ) : null}
+            </Link>
+          ))}
+          <Link
+            href={item.href}
+            onClick={() => setOpen(false)}
+            className="mt-1 block rounded-xl px-3.5 py-2.5 text-sm font-semibold text-[#8f5f22] hover:bg-[#f7f1e8]"
+          >
+            View all {item.label.toLowerCase()} →
+          </Link>
+        </div>
+      ) : null}
+    </div>
+  );
+}
 
 export function Header() {
   const pathname = usePathname();
@@ -24,6 +121,7 @@ export function Header() {
   const { cart, wishlist, user, setCartOpen, setSearchOpen } = useStore();
   const [scrolled, setScrolled] = useState(false);
   const [mobile, setMobile] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState<string | null>(null);
   const count = cart.reduce((n, i) => n + i.quantity, 0);
 
   useEffect(() => {
@@ -32,6 +130,13 @@ export function Header() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = mobile ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobile]);
 
   if (pathname.startsWith("/admin")) return null;
 
@@ -65,10 +170,7 @@ export function Header() {
               <Menu size={22} />
             </button>
 
-            <Link
-              href="/"
-              className="group flex shrink-0 items-center gap-2.5 text-[#171513]"
-            >
+            <Link href="/" className="group flex shrink-0 items-center gap-2.5 text-[#171513]">
               <span className="grid h-10 w-10 place-items-center rounded-full bg-[#f3ebe0] ring-1 ring-[#e4d7c5] transition-colors group-hover:bg-[#eadcc8]">
                 <Leaf size={20} className="fill-[#a8732f] text-[#a8732f]" />
               </span>
@@ -84,36 +186,9 @@ export function Header() {
           </div>
 
           <nav className="hidden items-center justify-center gap-1 lg:flex xl:gap-2">
-            {NAV.map((item) => {
-              const active =
-                pathname === item.href ||
-                (item.href !== "/" && pathname.startsWith(item.href.split("?")[0]));
-              const hasDropdown =
-                item.label === "Perfumes" || item.label === "Shoes";
-
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "group relative inline-flex items-center gap-1 rounded-full px-3.5 py-2 text-[15px] font-medium tracking-[0.01em] transition-colors xl:px-4 xl:text-base",
-                    active
-                      ? "bg-[#f4ebe0] text-[#8f5f22]"
-                      : item.label === "Sale"
-                        ? "text-[#b84532] hover:bg-[#faf3eb]"
-                        : "text-[#2f2a24] hover:bg-[#f7f1e8] hover:text-[#8f5f22]",
-                  )}
-                >
-                  {item.label}
-                  {hasDropdown ? (
-                    <ChevronDown
-                      size={15}
-                      className="opacity-70 transition-transform duration-300 group-hover:rotate-180"
-                    />
-                  ) : null}
-                </Link>
-              );
-            })}
+            {NAV.map((item) => (
+              <NavLink key={item.href + item.label} item={item} pathname={pathname} />
+            ))}
           </nav>
 
           <div className="flex items-center justify-end">
@@ -170,9 +245,9 @@ export function Header() {
             onClick={() => setMobile(false)}
             aria-label="Close menu"
           />
-          <aside className="relative flex h-full w-[88%] max-w-sm flex-col bg-[#fffcf8] p-7 drawer-in">
-            <div className="mb-10 flex items-center justify-between">
-              <span className="flex items-center gap-2.5 font-display text-3xl">
+          <aside className="relative flex h-full w-[88%] max-w-sm flex-col overflow-y-auto bg-[#fffcf8] p-6 drawer-in sm:p-7">
+            <div className="mb-8 flex items-center justify-between">
+              <span className="flex items-center gap-2.5 font-display text-2xl sm:text-3xl">
                 <Leaf size={22} className="fill-[#a8732f] text-[#a8732f]" />
                 {BRAND.name}
               </span>
@@ -181,25 +256,59 @@ export function Header() {
               </button>
             </div>
             <nav className="flex flex-col gap-1">
-              {NAV.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setMobile(false)}
-                  className="rounded-xl px-3 py-3 font-display text-3xl text-[#241f1a] hover:bg-[#f4ebe0]"
-                >
-                  {item.label}
-                </Link>
-              ))}
+              {NAV.map((item) => {
+                const expanded = mobileOpen === item.label;
+                if (!item.children?.length) {
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMobile(false)}
+                      className="rounded-xl px-3 py-3 text-2xl font-display text-[#241f1a] hover:bg-[#f4ebe0]"
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                }
+                return (
+                  <div key={item.label} className="rounded-xl">
+                    <button
+                      type="button"
+                      onClick={() => setMobileOpen(expanded ? null : item.label)}
+                      className="flex w-full items-center justify-between rounded-xl px-3 py-3 text-left text-2xl font-display text-[#241f1a] hover:bg-[#f4ebe0]"
+                    >
+                      {item.label}
+                      <ChevronDown
+                        size={18}
+                        className={cn("transition-transform", expanded && "rotate-180")}
+                      />
+                    </button>
+                    {expanded ? (
+                      <div className="mb-2 space-y-1 px-2 pb-2">
+                        {item.children.map((child) => (
+                          <Link
+                            key={child.href}
+                            href={child.href}
+                            onClick={() => setMobile(false)}
+                            className="block rounded-lg px-3 py-2.5 text-base text-[#4a4239] hover:bg-[#f4ebe0]"
+                          >
+                            {child.label}
+                          </Link>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })}
               <Link
                 href="/contact"
                 onClick={() => setMobile(false)}
-                className="rounded-xl px-3 py-3 font-display text-3xl text-[#241f1a] hover:bg-[#f4ebe0]"
+                className="rounded-xl px-3 py-3 text-2xl font-display text-[#241f1a] hover:bg-[#f4ebe0]"
               >
                 Contact
               </Link>
             </nav>
-            <div className="mt-auto space-y-3 text-base text-ink-soft">
+            <div className="mt-auto space-y-3 pt-8 text-base text-ink-soft">
               <Link href={user ? "/account" : "/login"} className="block font-medium">
                 {user ? "Account" : "Sign in"}
               </Link>
