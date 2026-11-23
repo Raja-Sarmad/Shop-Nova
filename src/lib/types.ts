@@ -1,4 +1,5 @@
 export type Category = "shoes" | "fragrance";
+export type Gender = "men" | "women" | "unisex";
 
 export type ProductColor = {
   name: string;
@@ -14,6 +15,7 @@ export type Product = {
   price: number;
   compareAtPrice?: number;
   category: Category;
+  gender?: Gender;
   collection: string;
   images: string[];
   colors: ProductColor[];
@@ -105,6 +107,8 @@ export type User = {
 export type ProductFilters = {
   query?: string;
   category?: Category | "all";
+  gender?: Gender | "all";
+  filter?: "new" | "bestseller" | "sale";
   collection?: string;
   color?: string;
   size?: string;

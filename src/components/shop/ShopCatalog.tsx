@@ -4,7 +4,17 @@ import { useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { SlidersHorizontal, X } from "lucide-react";
 import type { Product } from "@/lib/types";
-import { CATEGORIES, SORT_OPTIONS } from "@/lib/constants";
+import {
+  CATALOG_FILTERS,
+  CATEGORIES,
+  GENDERS,
+  SORT_OPTIONS,
+} from "@/lib/constants";
+import {
+  inStock,
+  matchesCatalogFilter,
+  matchesGender,
+} from "@/lib/catalogFilters";
 import { ProductGrid } from "@/components/product/ProductCard";
 import { cn, formatPrice } from "@/lib/format";
 import { useManagedProducts } from "@/hooks/useManagedProducts";
@@ -31,6 +41,8 @@ export function ShopCatalog({
   const [open, setOpen] = useState(false);
 
   const category = params.get("category") ?? "all";
+  const gender = params.get("gender") ?? "all";
+  const catalogFilter = params.get("filter") ?? "";
   const color = params.get("color") ?? "";
   const size = params.get("size") ?? "";
   const sort = params.get("sort") ?? "featured";
@@ -52,12 +64,12 @@ export function ShopCatalog({
   };
 
   const scopedProducts = useMemo(() => {
-    let list = managedProducts.filter(
-      (product) => product.stockQuantity === undefined || product.stockQuantity > 0,
-    );
+    let list = managedProducts.filter(inStock);
     if (category !== "all") list = list.filter((p) => p.category === category);
+    list = list.filter((p) => matchesGender(p, gender));
+    list = list.filter((p) => matchesCatalogFilter(p, catalogFilter));
     return list;
-  }, [managedProducts, category]);
+  }, [managedProducts, category, gender, catalogFilter]);
 
   const availableColors = useMemo(() => {
     const map = new Map<string, string>();
@@ -66,9 +78,7 @@ export function ShopCatalog({
         if (!map.has(c.name)) map.set(c.name, c.hex);
       }
     }
-    if (map.size === 0) {
-      return colors;
-    }
+    if (map.size === 0) return colors;
     return Array.from(map.entries()).map(([name, hex]) => ({ name, hex }));
   }, [scopedProducts, colors]);
 
@@ -78,7 +88,9 @@ export function ShopCatalog({
       for (const s of product.sizes) set.add(s);
     }
     if (set.size === 0) return sizes;
-    return Array.from(set).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+    return Array.from(set).sort((a, b) =>
+      a.localeCompare(b, undefined, { numeric: true }),
+    );
   }, [scopedProducts, sizes]);
 
   const filtered = useMemo(() => {
@@ -107,17 +119,41 @@ export function ShopCatalog({
 
   const activeFilterCount = [
     category !== "all",
+    gender !== "all",
+    Boolean(catalogFilter),
     Boolean(color),
     Boolean(size),
     max < 40000,
   ].filter(Boolean).length;
 
   const heading =
-    category === "fragrance"
-      ? "Perfumes"
-      : category === "shoes"
-        ? "Shoes"
-        : title;
+    gender === "men"
+      ? "Men"
+      : gender === "women"
+        ? "Women"
+        : category === "fragrance"
+          ? catalogFilter === "new"
+            ? "New perfumes"
+            : catalogFilter === "bestseller"
+              ? "Best-selling perfumes"
+              : catalogFilter === "sale"
+                ? "Perfume sale"
+                : "Perfumes"
+          : category === "shoes"
+            ? catalogFilter === "new"
+              ? "New shoes"
+              : catalogFilter === "bestseller"
+                ? "Best-selling shoes"
+                : catalogFilter === "sale"
+                  ? "Shoes on sale"
+                  : "Shoes"
+            : catalogFilter === "new"
+              ? "New arrivals"
+              : catalogFilter === "sale"
+                ? "Sale"
+                : catalogFilter === "bestseller"
+                  ? "Best sellers"
+                  : title;
 
   const Filters = (
     <div className="space-y-8">
@@ -129,7 +165,9 @@ export function ShopCatalog({
             onClick={() => setParam("category", "all")}
             className={cn(
               "rounded-xl px-3 py-2 text-left text-sm transition",
-              category === "all" ? "bg-[#f4ebe0] font-medium text-ink" : "text-ink-soft hover:bg-[#f7f1e8]",
+              category === "all"
+                ? "bg-[#f4ebe0] font-medium text-ink"
+                : "text-ink-soft hover:bg-[#f7f1e8]",
             )}
           >
             All
@@ -147,6 +185,74 @@ export function ShopCatalog({
               )}
             >
               {c.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <p className="text-[11px] tracking-[0.22em] uppercase text-muted">For</p>
+        <div className="mt-3 flex flex-col gap-1">
+          <button
+            type="button"
+            onClick={() => setParam("gender", "all")}
+            className={cn(
+              "rounded-xl px-3 py-2 text-left text-sm transition",
+              gender === "all"
+                ? "bg-[#f4ebe0] font-medium text-ink"
+                : "text-ink-soft hover:bg-[#f7f1e8]",
+            )}
+          >
+            Everyone
+          </button>
+          {GENDERS.map((g) => (
+            <button
+              key={g.slug}
+              type="button"
+              onClick={() => setParam("gender", g.slug)}
+              className={cn(
+                "rounded-xl px-3 py-2 text-left text-sm transition",
+                gender === g.slug
+                  ? "bg-[#f4ebe0] font-medium text-ink"
+                  : "text-ink-soft hover:bg-[#f7f1e8]",
+              )}
+            >
+              {g.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <p className="text-[11px] tracking-[0.22em] uppercase text-muted">Collection</p>
+        <div className="mt-3 flex flex-col gap-1">
+          <button
+            type="button"
+            onClick={() => setParam("filter", "")}
+            className={cn(
+              "rounded-xl px-3 py-2 text-left text-sm transition",
+              !catalogFilter
+                ? "bg-[#f4ebe0] font-medium text-ink"
+                : "text-ink-soft hover:bg-[#f7f1e8]",
+            )}
+          >
+            All pieces
+          </button>
+          {CATALOG_FILTERS.map((f) => (
+            <button
+              key={f.value}
+              type="button"
+              onClick={() =>
+                setParam("filter", catalogFilter === f.value ? "" : f.value)
+              }
+              className={cn(
+                "rounded-xl px-3 py-2 text-left text-sm transition",
+                catalogFilter === f.value
+                  ? "bg-[#f4ebe0] font-medium text-ink"
+                  : "text-ink-soft hover:bg-[#f7f1e8]",
+              )}
+            >
+              {f.label}
             </button>
           ))}
         </div>
@@ -238,11 +344,13 @@ export function ShopCatalog({
           <p className="mt-4 text-sm leading-7 text-ink-soft">{subtitle}</p>
         ) : (
           <p className="mt-4 text-sm leading-7 text-ink-soft">
-            {category === "fragrance"
-              ? "Signature scents curated for everyday and evening wear."
-              : category === "shoes"
-                ? "Footwear made for comfort, polish, and every step in between."
-                : "Explore perfumes and shoes in one clean shop."}
+            {gender === "men"
+              ? "Men’s perfumes and shoes published from your dashboard."
+              : gender === "women"
+                ? "Women’s perfumes, shoes and sandals from your dashboard."
+                : catalogFilter
+                  ? "Only products tagged for this section in the dashboard appear here."
+                  : "Shop shows the full live catalog. Use filters to narrow by category, gender, new, bestseller or sale."}
           </p>
         )}
       </div>
@@ -285,7 +393,10 @@ export function ShopCatalog({
         ) : (
           <div className="rounded-3xl border border-dashed border-sand px-6 py-16 text-center">
             <p className="font-display text-2xl">No pieces match</p>
-            <p className="mt-2 text-sm text-ink-soft">Try clearing a filter or widening the price range.</p>
+            <p className="mt-2 text-sm text-ink-soft">
+              Mark products as New / Bestseller / Sale or set Men / Women in the
+              dashboard to fill this view.
+            </p>
             <button
               type="button"
               onClick={clearFilters}

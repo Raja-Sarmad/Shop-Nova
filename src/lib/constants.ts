@@ -30,9 +30,21 @@ export const NAV: NavItem[] = [
     label: "Perfumes",
     children: [
       { href: "/shop?category=fragrance", label: "All perfumes", hint: "Full fragrance edit" },
-      { href: "/shop?category=fragrance&sort=newest", label: "New arrivals", hint: "Just dropped" },
-      { href: "/shop?category=fragrance&sort=rating", label: "Best sellers", hint: "Most loved" },
-      { href: "/shop?category=fragrance&sort=price-asc", label: "Under budget", hint: "Value picks" },
+      {
+        href: "/shop?category=fragrance&filter=new",
+        label: "New arrivals",
+        hint: "Marked new in dashboard",
+      },
+      {
+        href: "/shop?category=fragrance&filter=bestseller",
+        label: "Best sellers",
+        hint: "Marked bestseller",
+      },
+      {
+        href: "/shop?category=fragrance&filter=sale",
+        label: "On sale",
+        hint: "Compare-at price set",
+      },
     ],
   },
   {
@@ -40,13 +52,25 @@ export const NAV: NavItem[] = [
     label: "Shoes",
     children: [
       { href: "/shop?category=shoes", label: "All shoes", hint: "Full footwear edit" },
-      { href: "/shop?category=shoes&sort=newest", label: "New arrivals", hint: "Fresh pairs" },
-      { href: "/shop?category=shoes&sort=rating", label: "Best sellers", hint: "Top rated" },
-      { href: "/shop?category=shoes&sort=price-asc", label: "Everyday wear", hint: "Easy pricing" },
+      {
+        href: "/shop?category=shoes&filter=new",
+        label: "New arrivals",
+        hint: "Marked new in dashboard",
+      },
+      {
+        href: "/shop?category=shoes&filter=bestseller",
+        label: "Best sellers",
+        hint: "Marked bestseller",
+      },
+      {
+        href: "/shop?category=shoes&filter=sale",
+        label: "On sale",
+        hint: "Compare-at price set",
+      },
     ],
   },
-  { href: "/shop?sort=newest", label: "New Arrivals" },
-  { href: "/shop?sort=price-asc", label: "Sale" },
+  { href: "/shop?filter=new", label: "New Arrivals" },
+  { href: "/shop?filter=sale", label: "Sale" },
   { href: "/#offer", label: "Offers" },
 ];
 
@@ -55,12 +79,24 @@ export const CATEGORIES = [
   { slug: "fragrance", label: "Perfumes" },
 ] as const;
 
+export const GENDERS = [
+  { slug: "men", label: "Men" },
+  { slug: "women", label: "Women" },
+  { slug: "unisex", label: "Unisex" },
+] as const;
+
 export const SORT_OPTIONS = [
   { value: "featured", label: "Featured" },
   { value: "newest", label: "Newest" },
   { value: "price-asc", label: "Price: Low to High" },
   { value: "price-desc", label: "Price: High to Low" },
   { value: "rating", label: "Top Rated" },
+] as const;
+
+export const CATALOG_FILTERS = [
+  { value: "new", label: "New arrivals" },
+  { value: "bestseller", label: "Best sellers" },
+  { value: "sale", label: "On sale" },
 ] as const;
 
 export const PAYMENT_METHODS = [

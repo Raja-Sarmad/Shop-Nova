@@ -4,6 +4,7 @@ import { ArrowRight, BadgeCheck, CreditCard, Gem, ShieldCheck, Truck } from "luc
 import { getProducts, getTestimonials } from "@/lib/catalog";
 import { ManagedNewArrivals } from "@/components/home/ManagedNewArrivals";
 import { CategoryProductRail } from "@/components/home/CategoryProductRail";
+import { GenderProductRail } from "@/components/home/GenderProductRail";
 import { HeroSlider } from "@/components/home/HeroSlider";
 import type { Product } from "@/lib/types";
 
@@ -167,7 +168,7 @@ export default async function HomePage() {
                 On selected perfumes &amp; shoes from your live catalog
               </p>
               <Link
-                href="/shop"
+                href="/shop?filter=sale"
                 className="mt-7 inline-flex items-center gap-2 rounded-lg bg-[#d4ae69] px-6 py-3 text-sm font-semibold text-[#21180f]"
               >
                 Shop the Offer <ArrowRight size={16} />
@@ -282,7 +283,7 @@ export default async function HomePage() {
               New Arrivals
             </h2>
             <Link
-              href="/shop?sort=newest"
+              href="/shop?filter=new"
               className="inline-flex items-center gap-1.5 text-sm font-medium text-[#655d54] hover:text-[#a26a22]"
             >
               View All <ArrowRight size={14} />
@@ -290,6 +291,22 @@ export default async function HomePage() {
           </div>
           <ManagedNewArrivals initialProducts={allProducts} />
         </section>
+
+        <GenderProductRail
+          initialProducts={allProducts}
+          gender="men"
+          title="Men"
+          subtitle="Men’s perfumes and shoes — controlled from the dashboard gender field."
+          href="/shop?gender=men"
+        />
+
+        <GenderProductRail
+          initialProducts={allProducts}
+          gender="women"
+          title="Women"
+          subtitle="Women’s perfumes, shoes and sandals — published with Women (or Unisex) in the dashboard."
+          href="/shop?gender=women"
+        />
 
         <section className={pad}>
           <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
